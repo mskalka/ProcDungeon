@@ -1,5 +1,6 @@
-import pygame, sys
-from Screen import Screen, Spritesheet
+import pygame
+import sys
+from Screen import Screen
 from Map import Map
 from pygame.locals import *
 
@@ -22,6 +23,14 @@ class Game(object):
                                 continue
                             if event.key == K_ESCAPE:
                                 sys.exit(0)
+                            if event.key == K_UP:
+                                Screen.mapyoffset -= 8
+                            if event.key == K_DOWN:
+                                Screen.mapyoffset += 8
+                            if event.key == K_LEFT:
+                                Screen.mapxoffset -= 8
+                            if event.key == K_RIGHT:
+                                Screen.mapxoffset += 8
             self.screen.draw_screen_layers()
 
 
