@@ -1,5 +1,6 @@
 import pygame
 from Map import Map
+from Player import Player
 
 
 class Screen(object):
@@ -13,7 +14,15 @@ class Screen(object):
                                               self.SCREEN_HEIGHT))
         self.screen.fill((0, 0, 0))
 
+    def draw_player(self):
+        xcord = (Player.xpos * 16)
+        ycord = (Player.ypos * 16)
+        sprites = Spritesheet('spritesheet.png')
+        player = sprites.image_at((32, 0, 16, 16))
+        self.screen.blit(player, (ycord, xcord))
+
     def draw_map(self):
+        self.screen.fill((0, 0, 0))
         sprites = Spritesheet('spritesheet.png')
         wall1 = sprites.image_at((0, 0, 16, 16))
         wall2 = sprites.image_at((0, 16, 16, 16))
@@ -43,6 +52,7 @@ class Screen(object):
 
     def draw_screen_layers(self):
         self.draw_map()
+        self.draw_player()
         pygame.display.flip()
 
 
@@ -56,7 +66,6 @@ class Spritesheet(object):
 
     # Load a specific image from a specific rectangle
     def image_at(self, rectangle, colorkey=None):
-        "Loads image from x,y,x+offset,y+offset"
         rect = pygame.Rect(rectangle)
         image = pygame.Surface(rect.size).convert()
         image.blit(self.sheet, (0, 0), rect)
@@ -68,12 +77,10 @@ class Spritesheet(object):
 
     # Load a whole bunch of images and return them as a list
     def images_at(self, rects, colorkey=None):
-        "Loads multiple images, supply a list of coordinates"
         return [self.image_at(rect, colorkey) for rect in rects]
 
     # Load a whole strip of images
     def load_strip(self, rect, image_count, colorkey=None):
-        "Loads a strip of images and returns them as a list"
         tups = [(rect[0]+rect[2]*x, rect[1], rect[2], rect[3])
                 for x in range(image_count)]
         return self.images_at(tups, colorkey)

@@ -23,7 +23,7 @@ class Map(object):
         for i in range(self.y):
             self.map_abstract.append([])
             for j in range(self.x):
-                self.map_abstract[i].append(0)
+                self.map_abstract[i].append(7)
         # Generate list of rooms and halls to add to map
         self.place_rooms()
         self.place_halls_2()
@@ -79,7 +79,7 @@ class Map(object):
             for room2, c in room_list_dict.items():
                 x2 = room2.center[0]
                 y2 = room2.center[1]
-                if abs(x1 - x2) <= 8 and abs(y1 - y2) <= 8 and c <= 3:
+                if abs(x1 - x2) <= 8 and abs(y1 - y2) <= 8 and c <= 2:
                     if random.randint(0, 1) == 1:
                         self.hcorridor(x1, x2, y1)
                         self.vcorridor(y1, y2, x2)
@@ -87,6 +87,22 @@ class Map(object):
                         self.vcorridor(y1, y2, x1)
                         self.hcorridor(x1, x2, y2)
                     room_list_dict[room2] += 1
+
+        for room, c in room_list_dict.items():
+            if c == 0:  # Check if any room has no connections
+                x1 = room.center[0]
+                y1 = room.center[0]
+                for room2 in self.room_list:
+                    x2 = room2.center[0]
+                    y2 = room2.center[1]
+                    # Recheck distance, ignore max connections
+                    if abs(x1 - x2) <= 16 and abs(y1 - y2) <= 16:
+                        if random.randint(0, 1) == 1:
+                            self.hcorridor(x1, x2, y1)
+                            self.vcorridor(y1, y2, x2)
+                        else:
+                            self.vcorridor(y1, y2, x1)
+                            self.hcorridor(x1, x2, y2)
 
     def place_halls(self):
         """This puts out our graph to be used in the carve_hallways function.
@@ -149,8 +165,8 @@ class Room(object):
         self.center = ((self.x1 + self.x2) // 2, (self.y1 + self.y2) // 2)
 
     def intersects(self, other_room):
-        h_over = (self.x1 <= other_room.x2) and (self.x2 >= other_room.x1)
-        v_over = (self.y1 <= other_room.y2) and (self.y2 >= other_room.y1)
+        h_over = (self.x1 - 1 <= other_room.x2) and (self.x2 >= other_room.x1)
+        v_over = (self.y1 - 1 <= other_room.y2) and (self.y2 >= other_room.y1)
 
         return h_over and v_over
 

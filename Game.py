@@ -2,6 +2,7 @@ import pygame
 import sys
 from Screen import Screen
 from Map import Map
+from Player import Player
 from pygame.locals import *
 
 
@@ -12,6 +13,7 @@ class Game(object):
         self.clock = pygame.time.Clock()
         self.map = Map()
         self.map.generate_map()
+        self.player = Player()
         self.run()
 
     def run(self):
@@ -19,18 +21,19 @@ class Game(object):
         while 1:
             self.clock.tick(30)
             for event in pygame.event.get():
-                            if not hasattr(event, 'key'):
-                                continue
-                            if event.key == K_ESCAPE:
-                                sys.exit(0)
-                            if event.key == K_UP:
-                                Screen.mapyoffset -= 8
-                            if event.key == K_DOWN:
-                                Screen.mapyoffset += 8
-                            if event.key == K_LEFT:
-                                Screen.mapxoffset -= 8
-                            if event.key == K_RIGHT:
-                                Screen.mapxoffset += 8
+                if event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        sys.exit(0)
+                    if event.key == K_UP:
+                        Player.xpos -= 1
+                    if event.key == K_DOWN:
+                        Player.xpos += 1
+                    if event.key == K_LEFT:
+                        Player.ypos -= 1
+                    if event.key == K_RIGHT:
+                        Player.ypos += 1
+                else:
+                    continue
             self.screen.draw_screen_layers()
 
 
