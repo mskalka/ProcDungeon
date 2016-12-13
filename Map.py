@@ -26,7 +26,7 @@ class Map(object):
                 self.map_abstract[i].append(0)
         # Generate list of rooms and halls to add to map
         self.place_rooms()
-        self.place_halls()
+        self.place_halls_2()
         for hall in self.hall_list:
             hall.hprint()
         # Add rooms and halls to map
@@ -57,6 +57,36 @@ class Map(object):
                 # Adds newly made room to the room list
                 self.room_list.append(newroom)
                 self.room_count += 1
+
+    def place_halls_2(self):
+        """Different hall generation method. First we create a dict of all the
+        rooms, key being the room and val being number of connections.
+        Next iterate through the roomlist and check for close neighbors.
+        If a neighbor is found and the room doesn't have too many connections,
+        carve a halway to the neighbor. When it has too many connections,
+        pop it from the dictionary and move on.
+        Probable point of failure: Room has no reasonably close neighbors.
+        Possible solution: Check if any rooms have value of 0, then connect
+        them to a random room off the roomlist.
+        """
+        room_list_dict = {}
+        for i in range(len(self.room_list)):
+            room_list_dict[self.room_list[i]] = 0
+
+        for room in self.room_list:
+            x1 = room.center[0]
+            y1 = room.center[1]
+            for room2, c in room_list_dict.items():
+                x2 = room2.center[0]
+                y2 = room2.center[1]
+                if abs(x1 - x2) <= 8 and abs(y1 - y2) <= 8 and c <= 3:
+                    if random.randint(0, 1) == 1:
+                        self.hcorridor(x1, x2, y1)
+                        self.vcorridor(y1, y2, x2)
+                    else:
+                        self.vcorridor(y1, y2, x1)
+                        self.hcorridor(x1, x2, y2)
+                    room_list_dict[room2] += 1
 
     def place_halls(self):
         """This puts out our graph to be used in the carve_hallways function.
