@@ -11,19 +11,19 @@ class Map(object):
     room_list = []
     hall_list = []
     map_abstract = []
-    x = 50
-    y = 50
+    x = 40
+    y = 40
     room_count = 0
-    desired_rooms = 40
+    desired_rooms = 30
     room_min_size = 3
     room_max_size = 7
 
     def generate_map(self):
         # Create blank map
-        for i in range(0, self.x + 1):
+        for i in range(self.y):
             self.map_abstract.append([])
-            for j in range(0, self.y + 1):
-                self.map_abstract[i].append(7)
+            for j in range(self.x):
+                self.map_abstract[i].append(0)
         # Generate list of rooms and halls to add to map
         self.place_rooms()
         self.place_halls()
@@ -85,9 +85,9 @@ class Map(object):
                                room_2_center[0])
             else:
                 self.vcorridor(room_1_center[1], room_2_center[1],
-                               room_2_center[0])
+                               room_1_center[0])
                 self.hcorridor(room_1_center[0], room_2_center[0],
-                               room_1_center[1])
+                               room_2_center[1])
 
     def hcorridor(self, x1, x2, y):
         self.hall_list.append(Hallway(min(x1, x2), y, max(x1, x2), y))
@@ -97,14 +97,14 @@ class Map(object):
 
     def carve_rooms_and_halls(self):
         for room in self.room_list:
-            for x in range(room.x1, room.x2):
-                for y in range(room.y1, room.y2):
-                    self.map_abstract[x][y] = 4
+            for y in range(room.y1, room.y2):
+                for x in range(room.x1, room.x2):
+                    self.map_abstract[y][x] = 4
 
         for hall in self.hall_list:
-            for x in range(hall.x1, hall.x2 + 1):
-                for y in range(hall.y1, hall.y2 + 1):
-                    self.map_abstract[x][y] = 4
+            for y in range(hall.y1, hall.y2 + 1):
+                for x in range(hall.x1, hall.x2 + 1):
+                    self.map_abstract[y][x] = 4
 
 
 class Room(object):
@@ -134,5 +134,5 @@ class Hallway(object):
         self.y2 = y2
 
     def hprint(self):
-        print("x1, y1: {}, {} /n x2, y2: {}, {}".format(self.x1, self.y1,
-                                                        self.x2, self.y2))
+        print("x1, x2: {}, {} /n y1, y2: {}, {}".format(self.x1, self.x2,
+                                                        self.y1, self.y2))
