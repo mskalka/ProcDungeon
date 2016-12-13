@@ -1,160 +1,108 @@
-import random, networkx as nx
+import random
+import networkx as nx
+
+
+class Room(object):
+    """Holds the coordinates of the room object including the center.
+    Used later to determine intersections.
+    """
+    # Grid coords for each corner of the rooms
+    x1 = None
+    x2 = None
+    y1 = None
+    y2 = None
+    # Width and Heighth
+    width = None
+    height = None
+    # Center of the room
+    center = None
+
+    def new(self, x, y, w, h):
+        self.x1 = x
+        self.x2 = x + w
+        self.y1 = y
+        self.y2 = y + h
+        self.width = w
+        self.height = h
+        self.center = ((self.x1 + self.x2) // 2, (self.y1 + self.y2) // 2)
+
+    def intersects(self, other_room):
+        return (self.x1 <= other_room.x2 & self.x2 >= other_room.x1 &
+                self.y1 <= other_room.y2 & self.y2 >= other_room.y1)
+
+
+class Hallway(object):
+
+    x1 = None
+    x2 = None
+    y1 = None
+    y2 = None
+
+    def new(self, x1, x2, y1, y2):
+        self.x1 = x1
+        self.x2 = x2
+        self.y1 = y1
+        self.y2 = y2
+
 
 class Map(object):
-    """This class makes the map!
+    """This class makes the map.
        X and Y variables are the map size
        Desired rooms limits final room count
-       map and roomlist just to initialize the variables for later use
-       map holds the final map
-       roomlist holds a record of each room for later use in the MST calculation 
+       room_list holds each room
     """
-    map = []
-    visiblemap = []
+    room_list = []
     x = 60
     y = 60
-    roomcount = 0
-    desiredrooms = 40
-    roomlist = {}
-    
-    def blank_map(self):    
-        for i in range(self.y):
-            self.map.append([])     #Create a blank map of dimensions
-            self.visiblemap.append([])
-            for j in range (self.x):# X and Y, fill with placeholders
-                self.map[i].append('.')
-                self.visiblemap[i].append(0)
-            
-    def add_rooms(self):
-        """Adds rooms to our blank map, deonted by '0's.
-           First generates a random room by size and location,
-           then checks to see if that space is occupied. If it's not,
-           then it adds the room to that location. If it is, then it just
-           repeats with another room until the roomcount is reached.
-            
-           It's a little slow at this point, when I figure out how to speed 
-           the map generation up I can optimize it further. Works well enough
-           at this point if you don't try to make the desiredrooms variable 
-           too high compaired to the map size 
-        """
-        while self.roomcount < self.desiredrooms:
-            occupied = False
-            xdim = random.randint(4,7) #Set horz size
-            ydim = random.randint(4,7) #Set vert size
-            xloc = random.randint(1,self.x - xdim - 3) #Set the location, within bounds of map
-            yloc = random.randint(1,self.y - ydim - 3) #Keeps the room away from the edges
-            for i in range(yloc - 1, yloc + ydim + 1):
-                for j in range(xloc - 1, xloc + xdim + 1): #Check to see if the area is occuped
-                    if self.map[i][j] == '0':
-                        occupied = True
-                        
-            if not occupied:
-                for i in range(yloc, yloc + ydim):
-                    for j in range(xloc, xloc + xdim):  #Puts a room there if it's not occupied
-                        self.map[i][j] = '0'            #Use '0' for the basic floor tile
-                        if ydim % 2 == 0:
-                            ypos = yloc + ydim/2
-                        else:
-                            ypos = yloc + (ydim + 1)/2
-                        if xdim % 2 == 0:
-                            xpos = xloc + xdim/2
-                        else:
-                            xpos = xloc + (xdim + 1)/2
-                self.roomlist[self.roomcount] = ypos,xpos,ydim,xdim
-                self.roomcount += 1    
-        
-        
+    room_count = 0
+    desired_rooms = 30
+    room_min_size = 3
+    room_max_size = 12
+
+    def create_map(self):
+        self.place_rooms
+        self.make_graph
+        self.place_halls
+
+    def place_rooms(self):
+
+        for i in range(0, self.desired_rooms):
+            # Get wdith, height, x and y of potential new room
+            w = self.room_min_size + random(self.room_max_size -
+                                            self.room_min_size + 1)
+            h = self.room_min_size + random(self.room_max_size -
+                                            self.room_min_size + 1)
+            x = random(self.x - w - 1) + 1
+            y = random(self.y - h - 1) + 1
+
+            newroom = Room.new(x, y, w, h)
+            failed = False
+            for other in self.room_list:
+                # Loop through room list and check for intersections
+                if newroom.intersects(other):
+                    failed = True
+                    break
+            if not failed:
+                # Adds newly made room to the room list
+                self.room_list.add(newroom)
+
+    def place_halls(self):
+        connections = self.make_graph()
+        pass
+
     def make_graph(self):
         """This puts out our graph to be used in the carve_hallways function.
-           First it loops through our roomlist dictionary and adds each edge, 
+           First it loops through our room_list dictionary and adds each edge,
            using the distance (pythag's theorem) as the weight.
-           
-           Tried to implement a little randomness to the weights, but even a
-           4% variation made some really wonky stuff happen.
-           
-           Then the Networkx black magic outputs a minimum spanning tree 
+           Then the Networkx black magic outputs a minimum spanning tree
         """
         G = nx.Graph()
-        for i in range(len(self.roomlist)):
-            for j in range(len(self.roomlist)):
-                length = {'weight' : ((((self.roomlist[i][0] - self.roomlist[j][0]) ** 2) + ((self.roomlist[i][1] - self.roomlist[j][1]) ** 2)) ** 0.5)}
-                G.add_edge(i, j, length)
+        for room in self.room_list:
+            for other_room in self.room_list:
+                weight = {'weight': ((((room.center[0] -
+                                        other_room.center[0]) ** 2)
+                                     + ((other_room.center[1] -
+                                         other_room.center[1]) ** 2)) ** 0.5)}
+                G.add_edge(room, other_room, weight)
         mst = nx.minimum_spanning_tree(G)
         return mst
-    
-    def carve_hallways(self):
-        """Uses the minimum spanning tree graph from make_graph to connect each room.
-           Loops through each edge listed in the graph, then from that edge pulls the
-           connecting rooms from roomlist and pulls its Y and X coords out of the list.
-           After that it simply loops down placing '1' tiles in the Y then X direction
-           until each edge is connected.
-        """
-        hallwaylist = self.make_graph().edges()
-        for r in hallwaylist:
-            room1 = r[0]
-            room2 = r[1]
-            cy1 = self.roomlist[room1][0] - 1 # y value from cord1
-            cy2 = self.roomlist[room2][0] - 1 # y value from cord2
-            cx1 = self.roomlist[room1][1] - 1 # x value from cord1
-            cx2 = self.roomlist[room2][1] - 1 # x value from cord2
-            
-            if cy1 - cy2 < 0:
-                for i in range(cy1,cy2 + 1):
-                    if not self.map[i][cx1] == '0':
-                        self.map[i][cx1] = '1'
-                
-            elif cy1 - cy2 > 0:
-                for i in range(cy2,cy1 + 1):
-                    if not self.map[i][cx1] == '0':
-                        self.map[i][cx1] = '1'
-                
-                
-            if cx1 - cx2 < 0:
-                for i in range(cx1,cx2 + 1):
-                    if not self.map[cy2][i] == '0':
-                        self.map[cy2][i] = '1'  
-                
-            elif cx1 - cx2 > 0:
-                for i in range(cx2,cx1 + 1):
-                    if not self.map[cy2][i] == '0':
-                        self.map[cy2][i] = '1'
-                        
-    def add_doors(self):
-        """This function adds doors in the hallways made by carve_hallways.
-           Checks each '1' tile on the map, and depending on what's around it,
-           places a '2' tile (denoting a door) in it's place.
-        """
-        for i in range(self.y):
-            for j in range(self.x):
-                if self.map[i][j] == '1' and (self.map[i][j-1] == '0' and self.map[i][j+1] == '0') and not (self.map[i-1][j] == '1' or self.map[i+1][j] == '1'):
-                    self.map[i][j] = '2'
-                elif self.map[i][j] == '1' and (self.map[i-1][j] == '0' and self.map[i+1][j] == '0') and not (self.map[i][j-1] == '1' or self.map[i][j+1] == '1'):
-                    self.map[i][j] = '2'              
-                elif self.map[i][j] == '1' and self.map[i-1][j] == '0' and self.map[i+1][j] == '1'and not (self.map[i][j-1] == '1' or self.map[i][j+1] == '1'):
-                    self.map[i][j] = '2'
-                elif self.map[i][j] == '1' and self.map[i][j-1] == '0' and self.map[i][j+1] == '1'and not (self.map[i-1][j] == '1' or self.map[i+1][j] == '1'):
-                    self.map[i][j] = '2'
-                elif self.map[i][j] == '1' and self.map[i+1][j] == '0' and self.map[i-1][j] == '1'and not (self.map[i][j-1] == '1' or self.map[i][j+1] == '1'):
-                    self.map[i][j] = '2'
-                elif self.map[i][j] == '1' and self.map[i][j+1] == '0' and self.map[i][j-1] == '1'and not (self.map[i-1][j] == '1' or self.map[i+1][j] == '1'):
-                    self.map[i][j] = '2'
-    
-    def randomize_floors_and_walls(self):
-        for i in range(self.y):
-            for j in range(self.x):
-                if self.map[i][j] == '.':
-                    rand = random.randint(7,9)
-                    self.map[i][j] = str(rand)
-                if self.map[i][j] == '1' or self.map[i][j] == '0':
-                    rand = random.randint(4,6)
-                    self.map[i][j] = str(rand)
-                    
-    def generate_map(self):
-        self.blank_map()
-        self.add_rooms()
-        self.carve_hallways()
-        self.add_doors()
-        self.randomize_floors_and_walls()    
-                
-    def print_map(self):
-        for row in self.map:
-            print row
