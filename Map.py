@@ -3,27 +3,34 @@ import networkx as nx
 
 
 class Map(object):
+
     """This class makes the map.
        X and Y variables are the map size
        Desired rooms limits final room count
        room_list holds each room
     """
-    room_list = []
-    hall_list = []
-    map_abstract = []
-    x = 40
-    y = 40
-    room_count = 0
-    desired_rooms = 30
-    room_min_size = 3
-    room_max_size = 7
+
+    def __init__(self, x, y, desired_rooms, rmin, rmax):
+        self.room_list = []
+        self.hall_list = []
+        self.map_abstract = []
+        self.revealed_map = []
+        self.x = x
+        self.y = y
+        self.desired_rooms = desired_rooms
+        self.room_min_size = rmin
+        self.room_max_size = rmax
+        self.room_count = 0
+        self.generate_map()
 
     def generate_map(self):
         # Create blank map
         for i in range(self.y):
             self.map_abstract.append([])
+            self.revealed_map.append([])
             for j in range(self.x):
                 self.map_abstract[i].append(7)
+                self.revealed_map[i].append(0)
         # Generate list of rooms and halls to add to map
         self.place_rooms()
         self.place_halls_2()
@@ -35,16 +42,15 @@ class Map(object):
             print(i)
 
     def place_rooms(self):
-        """
-        """
+
         while self.room_count < self.desired_rooms:
             # Get wdith, height, x and y of potential new room
             w = self.room_min_size + random.randint(0, self.room_max_size -
                                                     self.room_min_size)
             h = self.room_min_size + random.randint(0, self.room_max_size -
                                                     self.room_min_size)
-            x = random.randint(1, self.x - w - 1) + 1
-            y = random.randint(1, self.y - h - 1) + 1
+            x = random.randint(1, self.x - w - 2) + 1
+            y = random.randint(1, self.y - h - 3) + 1
 
             newroom = Room(x, y, w, h)
             failed = False
@@ -67,7 +73,7 @@ class Map(object):
         pop it from the dictionary and move on.
         Probable point of failure: Room has no reasonably close neighbors.
         Possible solution: Check if any rooms have value of 0, then connect
-        them to a random room off the roomlist.
+        them to a room in a larger range regardless of connections.
         """
         room_list_dict = {}
         for i in range(len(self.room_list)):

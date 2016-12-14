@@ -9,10 +9,11 @@ class Screen(object):
     mapyoffset = 0
     mapxoffset = 0
 
-    def __init__(self):
+    def __init__(self, current_map):
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH,
                                               self.SCREEN_HEIGHT))
         self.screen.fill((0, 0, 0))
+        self.map = current_map
 
     def draw_player(self):
         xcord = (Player.xpos * 16)
@@ -31,24 +32,26 @@ class Screen(object):
         floor2 = sprites.image_at((16, 16, 16, 16))
         floor3 = sprites.image_at((16, 32, 16, 16))
         door = sprites.image_at((32, 0, 16, 16))
-        for i in range(0, Map.y):
-            for j in range(0, Map.x):
-                ycord = (i * 16) - self.mapxoffset
-                xcord = (j * 16) - self.mapyoffset
-                if Map.map_abstract[i][j] == 7:
-                    self.screen.blit(wall1, (ycord, xcord))
-                elif Map.map_abstract[i][j] == 8:
-                    self.screen.blit(wall2, (ycord, xcord))
-                elif Map.map_abstract[i][j] == 9:
-                    self.screen.blit(wall3, (ycord, xcord))
-                elif Map.map_abstract[i][j] == 4:
-                    self.screen.blit(floor1, (ycord, xcord))
-                elif Map.map_abstract[i][j] == 5:
-                    self.screen.blit(floor1, (ycord, xcord))
-                elif Map.map_abstract[i][j] == 6:
-                    self.screen.blit(floor3, (ycord, xcord))
-                elif Map.map_abstract[i][j] == 2:
-                    self.screen.blit(door, (ycord, xcord))
+        for i in range(0, self.map.y):
+            for j in range(0, self.map.x):
+                if self.map.revealed_map[i][j] == 1:
+                    ycord = (i * 16) - self.mapxoffset
+                    xcord = (j * 16) - self.mapyoffset
+                    if self.map.map_abstract[i][j] == 7:
+                        self.screen.blit(wall1, (ycord, xcord))
+                    elif self.map.map_abstract[i][j] == 8:
+                        self.screen.blit(wall2, (ycord, xcord))
+                    elif self.map.map_abstract[i][j] == 9:
+                        self.screen.blit(wall3, (ycord, xcord))
+                    elif self.map.map_abstract[i][j] == 4:
+                        self.screen.blit(floor1, (ycord, xcord))
+                    elif self.map.map_abstract[i][j] == 5:
+                        self.screen.blit(floor1, (ycord, xcord))
+                    elif self.map.map_abstract[i][j] == 6:
+                        self.screen.blit(floor3, (ycord, xcord))
+                    elif self.map.map_abstract[i][j] == 2:
+                        self.screen.blit(door, (ycord, xcord))
+
 
     def draw_screen_layers(self):
         self.draw_map()

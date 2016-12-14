@@ -10,10 +10,9 @@ class Game(object):
 
     def __init__(self):
         self.clock = pygame.time.Clock()
-        self.map = Map()
-        self.map.generate_map()
-        self.screen = Screen()
-        self.player = Player()
+        self.map = Map(40, 40, 30, 3, 7)  # x, y, rooms, min, max
+        self.screen = Screen(self.map)
+        self.player = Player(self.map)
         self.run()
 
     def run(self):

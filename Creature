@@ -2,7 +2,7 @@ from Map import Map
 
 class Creature(object):
 
-    def __init__(self):
+    def __init__(self, current_map):
         pass
 
     def get_pos(self):
@@ -19,3 +19,6 @@ class Creature(object):
 
     def check_intersect(self, xpos, ypos, xdelta, ydelta):
         return not Map.map_abstract[ypos + ydelta][xpos + xdelta] == 7
+
+    def pathing(self, xpos, ypos, xtar, ytar):
+        pass
