@@ -9,10 +9,10 @@ from pygame.locals import *
 class Game(object):
 
     def __init__(self):
-        self.screen = Screen()
         self.clock = pygame.time.Clock()
         self.map = Map()
         self.map.generate_map()
+        self.screen = Screen()
         self.player = Player()
         self.run()
 
@@ -25,13 +25,13 @@ class Game(object):
                     if event.key == K_ESCAPE:
                         sys.exit(0)
                     if event.key == K_UP:
-                        Player.xpos -= 1
+                        Player.move(self.player, -1, 0)
                     if event.key == K_DOWN:
-                        Player.xpos += 1
+                        Player.move(self.player, 1, 0)
                     if event.key == K_LEFT:
-                        Player.ypos -= 1
+                        Player.move(self.player, 0,-1)
                     if event.key == K_RIGHT:
-                        Player.ypos += 1
+                        Player.move(self.player, 0, 1)
                 else:
                     continue
             self.screen.draw_screen_layers()
