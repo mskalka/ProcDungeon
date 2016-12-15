@@ -27,8 +27,7 @@ class Game(object):
         r = random.choice(self.map.room_list)
         print("Start:({}, {})".format(r.center[0], r.center[1]))
         print("Goal:({}, {})".format(Player.xpos, Player.ypos))
-        c.path_to((r.center[0], r.center[1]), (Player.xpos, Player.ypos))
-
+        p = c.path_to((r.center[0], r.center[1]), (Player.xpos, Player.ypos))
         while 1:
             self.clock.tick(30)
             for event in pygame.event.get():
@@ -45,7 +44,7 @@ class Game(object):
                     Player.move(self.player, 0, 1)
                 else:
                     continue
-            self.screen.draw_screen_layers()
+            self.screen.draw_screen_layers(p)
 
 
 def main():

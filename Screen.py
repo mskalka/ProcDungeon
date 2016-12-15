@@ -23,6 +23,10 @@ class Screen(object):
         player = self.sprites.image_at((192, 0, 16, 16))
         self.screen.blit(player, (ycord, xcord))
 
+    def draw_path(self, path):
+        for x, y in path:
+            self.screen.blit(self.sprites.image_at((16, 0, 16, 16)), (y * 16, x * 16))
+
     def draw_map(self):
         walls = [self.sprites.image_at((0, 0, 16, 16)),
                  self.sprites.image_at((0, 16, 16, 16)),
@@ -254,12 +258,13 @@ class Screen(object):
                     xcord = (j * 16) - self.mapyoffset
                     self.screen.blit(black, (ycord, xcord))
 
-    def draw_screen_layers(self):
+    def draw_screen_layers(self, path):
         self.screen.fill((0, 0, 0))
         self.draw_map()
         self.draw_player()
         self.draw_wall_toppers()
-        self.draw_fog()
+        # self.draw_fog()
+        self.draw_path(path)
         pygame.display.update()
 
 

@@ -2,6 +2,7 @@ import random
 from Creature import Creature
 from Map import Map
 
+
 class DungeonMaster(object):
 
     monsters_per_level = 10
