@@ -1,5 +1,6 @@
 from Map import Map
 
+
 class Creature(object):
 
     def __init__(self, current_map):

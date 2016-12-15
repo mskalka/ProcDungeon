@@ -6,7 +6,6 @@ class Player(object):
 
     xpos, ypos = None, None
 
-
     def __init__(self, current_map):
         self.current_map = current_map
         start_room = random.choice(current_map.room_list)
@@ -14,6 +13,7 @@ class Player(object):
         Player.xpos = start_room.center[0]
         Player.ypos = start_room.center[1]
         self.vision = 1
+        self.uncover_map()
 
     def get_pos(self):
         return self.xpos, self.ypos
@@ -35,7 +35,6 @@ class Player(object):
                     self.current_map.revealed_map[Player.ypos + i][Player.xpos + j] = 1
                 except IndexError:
                     continue
-
 
     def check_intersect(self, xpos, ypos, xdelta, ydelta):
         try:

@@ -13,6 +13,7 @@ class Game(object):
         self.map = Map(40, 40, 30, 3, 7)  # x, y, rooms, min, max
         self.screen = Screen(self.map)
         self.player = Player(self.map)
+        pygame.key.set_repeat(60, 60)
         self.run()
 
     def run(self):
@@ -20,19 +21,18 @@ class Game(object):
         while 1:
             self.clock.tick(30)
             for event in pygame.event.get():
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        sys.exit(0)
-                    if event.key == K_UP:
-                        Player.move(self.player, -1, 0)
-                    if event.key == K_DOWN:
-                        Player.move(self.player, 1, 0)
-                    if event.key == K_LEFT:
-                        Player.move(self.player, 0,-1)
-                    if event.key == K_RIGHT:
-                        Player.move(self.player, 0, 1)
-                else:
-                    continue
+                self.pressed = pygame.key.get_pressed()
+                if self.pressed[K_ESCAPE]:
+                    sys.exit(0)
+                if self.pressed[K_UP]:
+                    Player.move(self.player, -1, 0)
+                if self.pressed[K_DOWN]:
+                    Player.move(self.player, 1, 0)
+                if self.pressed[K_LEFT]:
+                    Player.move(self.player, 0, -1)
+                if self.pressed[K_RIGHT]:
+                    Player.move(self.player, 0, 1)
+
             self.screen.draw_screen_layers()
 
 

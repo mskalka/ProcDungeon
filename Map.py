@@ -121,9 +121,9 @@ class Map(object):
         for room in self.room_list:
             for other_room in self.room_list:
                 weight = {'weight': ((((room.center[0] -
-                                        other_room.center[0]) ** 2)
-                                     + ((other_room.center[1] -
-                                         other_room.center[1]) ** 2)) ** 0.5)}
+                                        other_room.center[0]) ** 2) +
+                                      ((other_room.center[1] -
+                                        other_room.center[1]) ** 2)) ** 0.5)}
                 G.add_edge(room, other_room, weight)
         mst = nx.minimum_spanning_tree(G)
 
