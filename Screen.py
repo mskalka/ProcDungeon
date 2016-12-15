@@ -20,20 +20,10 @@ class Screen(object):
     def draw_player(self):
         xcord = (Player.xpos * 16)
         ycord = (Player.ypos * 16)
-        sprites = Spritesheet('spritesheet.png')
-        player = sprites.image_at((192, 0, 16, 16))
+        player = self.sprites.image_at((192, 0, 16, 16))
         self.screen.blit(player, (ycord, xcord))
 
     def draw_map(self):
-        """
-        Map draw order:
-        * Fill in everything that's a floor. Randomize floor tiles.
-        * Fill in the base of each wall. Differentiate corners/straight sections.
-        * Fill in straight vertical sections with vert walls.
-        * Fill in above each wall with appropriate cap.
-        """
-        self.screen.fill((0, 0, 0))
-        sprites = Spritesheet('spritesheet.png')
         walls = [self.sprites.image_at((0, 0, 16, 16)),
                  self.sprites.image_at((0, 16, 16, 16)),
                  self.sprites.image_at((0, 32, 16, 16))]
@@ -201,10 +191,10 @@ class Screen(object):
                         self.screen.blit(wall_toppers[7], (ycord, xcord))
                 try:
                     down = (self.map.map_abstract[i][j] == 7 and  # Is wall
-                          self.map.map_abstract[i][j + 1] == 4 and  # Floor below
-                          self.map.map_abstract[i][j - 1] == 7 and  # Wall above
-                          self.map.map_abstract[i - 1][j] == 4 and  # Floor right
-                          self.map.map_abstract[i + 1][j] == 4)  # Floor Left
+                            self.map.map_abstract[i][j + 1] == 4 and  # Floor below
+                            self.map.map_abstract[i][j - 1] == 7 and  # Wall above
+                            self.map.map_abstract[i - 1][j] == 4 and  # Floor right
+                            self.map.map_abstract[i + 1][j] == 4)  # Floor Left
                 except IndexError:
                     continue
                 else:
@@ -212,10 +202,10 @@ class Screen(object):
                         self.screen.blit(wall_toppers[11], (ycord, xcord))
                 try:
                     up = (self.map.map_abstract[i][j] == 7 and  # Is wall
-                            self.map.map_abstract[i][j + 1] == 7 and  # Wall below
-                            self.map.map_abstract[i][j - 1] == 4 and  # Floor above
-                            self.map.map_abstract[i - 1][j] == 4 and  # Floor right
-                            self.map.map_abstract[i + 1][j] == 4)  # Floor Left
+                          self.map.map_abstract[i][j + 1] == 7 and  # Wall below
+                          self.map.map_abstract[i][j - 1] == 4 and  # Floor above
+                          self.map.map_abstract[i - 1][j] == 4 and  # Floor right
+                          self.map.map_abstract[i + 1][j] == 4)  # Floor Left
                 except IndexError:
                     continue
                 else:
@@ -234,10 +224,10 @@ class Screen(object):
                         self.screen.blit(wall_toppers[14], (ycord, xcord))
                 try:
                     right = (self.map.map_abstract[i][j] == 7 and  # Is wall
-                            self.map.map_abstract[i][j + 1] == 4 and  # Floor below
-                            self.map.map_abstract[i][j - 1] == 4 and  # Floor above
-                            self.map.map_abstract[i - 1][j] == 4 and  # Floor right
-                            self.map.map_abstract[i + 1][j] == 7)  # Wall Left
+                             self.map.map_abstract[i][j + 1] == 4 and  # Floor below
+                             self.map.map_abstract[i][j - 1] == 4 and  # Floor above
+                             self.map.map_abstract[i - 1][j] == 4 and  # Floor right
+                             self.map.map_abstract[i + 1][j] == 7)  # Wall Left
                 except IndexError:
                     continue
                 else:
@@ -254,6 +244,7 @@ class Screen(object):
                 else:
                     if pillar:  # It's a pillar
                         self.screen.blit(wall_toppers[15], (ycord, xcord))
+
     def draw_fog(self):
         for i in range(0, self.map.y):
             for j in range(0, self.map.x):
@@ -264,11 +255,12 @@ class Screen(object):
                     self.screen.blit(black, (ycord, xcord))
 
     def draw_screen_layers(self):
+        self.screen.fill((0, 0, 0))
         self.draw_map()
         self.draw_player()
         self.draw_wall_toppers()
         self.draw_fog()
-        pygame.display.flip()
+        pygame.display.update()
 
 
 class Spritesheet(object):
@@ -288,6 +280,7 @@ class Spritesheet(object):
             if colorkey is -1:
                 colorkey = image.get_at((0, 0))
             image.set_colorkey(colorkey, pygame.RLEACCEL)
+            image.convert_alpha()
         return image
 
     # Load a whole bunch of images and return them as a list

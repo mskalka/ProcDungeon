@@ -9,10 +9,10 @@ class Player(object):
     def __init__(self, current_map):
         self.current_map = current_map
         start_room = random.choice(current_map.room_list)
-        print(start_room.center[0], start_room.center[1])
         Player.xpos = start_room.center[0]
         Player.ypos = start_room.center[1]
         self.vision = 1
+
         self.uncover_map()
 
     def get_pos(self):

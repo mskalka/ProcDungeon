@@ -34,12 +34,8 @@ class Map(object):
         # Generate list of rooms and halls to add to map
         self.place_rooms()
         self.place_halls_2()
-        for hall in self.hall_list:
-            hall.hprint()
         # Add rooms and halls to map
         self.carve_rooms_and_halls()
-        for i in self.map_abstract:
-            print(i)
 
     def place_rooms(self):
 
