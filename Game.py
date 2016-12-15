@@ -13,7 +13,7 @@ class Game(object):
 
     def __init__(self):
         self.clock = pygame.time.Clock()
-        self.map = Map(40, 40, 30, 3, 7)  # x, y, rooms, min, max
+        self.map = Map(30, 50, 20, 3, 7)  # x, y, rooms, min, max
         self.screen = Screen(self.map)
         self.player = Player(self.map)
         self.dm = DungeonMaster(self.map)

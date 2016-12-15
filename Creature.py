@@ -36,7 +36,7 @@ class Pathfinding:
     def make_graph(self, current_map):
         g = nx.Graph()
         for i in range(0, len(current_map)):
-            for j in range(0, len(current_map)):
+            for j in range(0, len(current_map[0])):
                 if current_map[i][j] != 7:
                     cell = (j, i)
                     neighbors = []

@@ -5,8 +5,8 @@ from Player import Player
 
 
 class Screen(object):
-    SCREEN_WIDTH = 1200
-    SCREEN_HEIGHT = 900
+    SCREEN_WIDTH = 800
+    SCREEN_HEIGHT = 600
     mapyoffset = 0
     mapxoffset = 0
 
@@ -24,8 +24,11 @@ class Screen(object):
         self.screen.blit(player, (ycord, xcord))
 
     def draw_path(self, path):
-        for x, y in path:
-            self.screen.blit(self.sprites.image_at((16, 0, 16, 16)), (y * 16, x * 16))
+        try:
+            for x, y in path:
+                self.screen.blit(self.sprites.image_at((16, 0, 16, 16)), (y * 16, x * 16))
+        except TypeError:
+            print "No path to print, sorry."
 
     def draw_map(self):
         walls = [self.sprites.image_at((0, 0, 16, 16)),
@@ -261,10 +264,11 @@ class Screen(object):
     def draw_screen_layers(self, path):
         self.screen.fill((0, 0, 0))
         self.draw_map()
+        self.draw_path(path)
         self.draw_player()
         self.draw_wall_toppers()
         # self.draw_fog()
-        self.draw_path(path)
+
         pygame.display.update()
 
 
