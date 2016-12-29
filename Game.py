@@ -11,23 +11,31 @@ from pygame.locals import *
 
 class Game(object):
 
+    SCREEN_WIDTH = 800
+    SCREEN_HEIGHT = 600
+
     def __init__(self):
         self.clock = pygame.time.Clock()
-        self.map = Map(30, 50, 20, 3, 7)  # x, y, rooms, min, max
-        self.screen = Screen(self.map)
+        self.map = Map(30, 40, 0)  # radius, rooms, min, max
         self.player = Player(self.map)
+        self.screen = Screen(self.player,
+                             self.map,
+                             self.SCREEN_WIDTH,
+                             self.SCREEN_HEIGHT)
         self.dm = DungeonMaster(self.map)
-
         pygame.key.set_repeat(60, 60)
 
         self.run()
 
     def run(self):
+        """
+        # Test the Pathfinding:
         c = Creature(self.map.map_abstract)
         r = random.choice(self.map.room_list)
         print("Start:({}, {})".format(r.center[0], r.center[1]))
         print("Goal:({}, {})".format(Player.xpos, Player.ypos))
         p = c.path_to((r.center[0], r.center[1]), (Player.xpos, Player.ypos))
+        """
         while 1:
             self.clock.tick(30)
             for event in pygame.event.get():
@@ -35,16 +43,20 @@ class Game(object):
                 if self.pressed[K_ESCAPE] or event.type == pygame.QUIT:
                     sys.exit(0)
                 if self.pressed[K_UP]:
-                    Player.move(self.player, -1, 0)
+                    self.screen.mapyoffset += 16
+                    # Player.move(self.player, -1, 0)
                 if self.pressed[K_DOWN]:
-                    Player.move(self.player, 1, 0)
+                    self.screen.mapyoffset -= 16
+                    # Player.move(self.player, 1, 0)
                 if self.pressed[K_LEFT]:
-                    Player.move(self.player, 0, -1)
+                    self.screen.mapxoffset += 16
+                    # Player.move(self.player, 0, -1)
                 if self.pressed[K_RIGHT]:
-                    Player.move(self.player, 0, 1)
+                    self.screen.mapxoffset -= 16
+                    # Player.move(self.player, 0, 1)
                 else:
                     continue
-            self.screen.draw_screen_layers(p)
+            self.screen.draw_screen_layers()
 
 
 def main():

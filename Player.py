@@ -1,5 +1,6 @@
 from Map import Map
 import random
+import pygame
 
 
 class Player(object):
@@ -8,13 +9,17 @@ class Player(object):
 
     def __init__(self, current_map):
         self.current_map = current_map
+        """
         start_room = random.choice(current_map.room_list)
         Player.xpos = start_room.center[0]
         Player.ypos = start_room.center[1]
+
+        self.rect = pygame.Rect(Player.xpos, Player.ypos, 16, 16)
         self.vision = 1
 
         self.uncover_map()
-
+        """
+        
     def get_pos(self):
         return self.xpos, self.ypos
 
@@ -26,6 +31,7 @@ class Player(object):
         if self.check_intersect(self.xpos, self.ypos, x, y):
             Player.xpos += x
             Player.ypos += y
+            self.rect.move(x, y)
         self.uncover_map()
 
     def uncover_map(self):

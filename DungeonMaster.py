@@ -11,6 +11,6 @@ class DungeonMaster(object):
     def __init__(self, current_map):
         self.current_map = current_map
 
-    def generate_creatures(self):
-        for i in range(0, monsters_per_level):
+    def generate_creatures(self, num_monsters):
+        for i in range(0, num_monsters):
             monsters[i] = Creature(self.current_map)
