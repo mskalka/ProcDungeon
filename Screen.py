@@ -41,24 +41,18 @@ class Screen(object):
         wall = self.spritesheet.image_at((0, 0, 16, 16))
         floor = self.spritesheet.image_at((16, 32, 16, 16))
 
-        x_min = 0
-        y_min = 0
         x_max = 0
         y_max = 0
 
-        for room in self.map.room_list:
-            x_min = min(room.x1, x_min)
-            y_min = min(room.y1, y_min)
-            x_max = max(room.x2, x_max)
-            y_max = max(room.y2, y_max)
+        for cell in self.map.map_abstract:
+            (x, y) = cell
+            x_max = max(x, x_max)
+            y_max = max(y, y_max)
 
         map_surface = pygame.Surface(((x_max + 3) * 16,
                                       (y_max + 3) * 16))
 
-        print("X_min: {}, X_max: {}, Y_min: {}, Y_max: {}".format(x_min, x_max,
-                                                                  y_min, y_max))
-
-        for x in range(-100, 100):
+        """for x in range(-100, 100):
             for y in range(-100, 100):
                 ycord = (y * 16)
                 xcord = (x * 16)
@@ -78,7 +72,17 @@ class Screen(object):
                     xcord = (x * 16)
                     map_surface.blit(floor, (xcord, ycord))
         map_surface.blit(floor, ((x_max + 1) * 16,
-                                 (y_max + 1) * 16))
+                                 (y_max + 1) * 16))"""
+
+        for cell in self.map.map_abstract:
+            (x, y) = cell
+            ycord = (y * 16)
+            xcord = (x * 16)
+            if self.map.map_abstract[cell].tile == 4:
+                map_surface.blit(floor, (xcord, ycord))
+            elif self.map.map_abstract[cell].tile == 0:
+                map_surface.blit(wall, (xcord, ycord))
+
         return map_surface
 
     def draw_map_old(self):
