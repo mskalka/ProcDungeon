@@ -7,16 +7,11 @@ class Map(object):
 
     """
     This class makes the map.
-    Each map is roughly round, with a radius set in initial map generation
+    Each map is round, with a radius set in initial map generation
     Desired rooms limits final room count
     room_list holds each room
-
-    Each entry in the abstract map represents each "cell",
-    a 3x3 grid of room tiles.
-
-
-    Floor is represented by a 4, walls 7, halls 6, raw area as 0.
-
+    map_abstract holds the cells that represent tile meta information
+    final_map is the blockwise version of map_abstract
     """
 
     def __init__(self, radius, desired_rooms, fuzz):
@@ -24,6 +19,7 @@ class Map(object):
         self.hall_list = []
         self.map_abstract = {}
         self.revealed_map = []
+        self.final_map = []
         self.radius = radius
         self.desired_rooms = desired_rooms
         self.room_fuzz = fuzz
@@ -33,13 +29,74 @@ class Map(object):
     def generate_map(self):
         self.place_rooms()
         self.add_halls()
+        self.create_final_map()
+
+    def create_final_map(self):
+        """
+        Generate the final map to be used by other classes.
+        This will define what is and isn't pathable terrain, as well as
+        expand out the cells to their proper size.
+
+        A represents the "center" of the cell
+        +-------+
+        | A | B |
+        +---+---+
+        | C | D |
+        +-------+
+
+        When a connection is formed, the tile that is directly between the
+        A and A' is carved out. The "Doors" list in each cell ensures that
+        doors are properly added after the initial carve
+        """
+
+        x_max = 0
+        y_max = 0
+        p_doors = []
+        # Generate a list of empty grid spaces for the map
+        for _, cell in self.map_abstract.iteritems():
+            (x, y) = cell.center
+            x_max = max(x, x_max)
+            y_max = max(y, y_max)
+
+        for y in range(0, (y_max * 2) + 2):
+            self.final_map.append([])
+            for x in range(0, (x_max * 2) + 2):
+                self.final_map[y].append(7)
+
+        for _, cell in self.map_abstract.iteritems():
+            if cell.tile != 99:
+                (x1, y1) = cell.center
+                self.final_map[y1 * 2][x1 * 2] = cell.tile
+                for other in cell.connections:
+                    (x2, y2) = other.center
+                    for y in range(min(y1, y2) * 2, max(y1, y2) * 2 + 1):
+                        for x in range(min(x1, x2) * 2, max(x1, x2) * 2 + 1):
+                            self.final_map[y][x] = cell.tile
+        for room in self.room_list:
+            (x1, y1) = (room.x1, room.y1)
+            (x2, y2) = (room.x2, room.y2)
+            self.final_map[y1 * 2][x1 * 2] = 3
+            self.final_map[y2 * 2][x2 * 2] = 3
+
+        for cell in p_doors:
+            (x1, y1) = cell.center
+            for other in cell.doors:
+                (x2, y2) = other.center
+                if x1 < x2 and y1 == y2:  # Other to right
+                    self.final_map[y1 * 2][(x2 * 2) - 1] = 3
+                if x1 == x2 and y1 < y2:  # Above the other
+                    self.final_map[(y1 * 2) - 1][x1 * 2] = 3
+                if x2 < x1 and y1 == y2:  # Other to left
+                    self.final_map[y1 * 2][(x1 * 2) - 1] = 3
+                if x1 == x2 and y1 > y2:  # Below the other
+                    self.final_map[(y1 * 2) + 1][x1 * 2] = 3
 
     def place_rooms(self):
         while self.room_count < self.desired_rooms:
             # Each room gets its own unique region ID, to be used in hall placement
 
             # Create a room with a random, odd width and height
-            size = (random.randint(2, 3 + self.room_fuzz))
+            size = (random.randint(1, 2 + self.room_fuzz))
             rect = random.randint(0, 1 + size)
             w = size
             h = size
@@ -80,7 +137,7 @@ class Map(object):
         for c in cells:
             (x, y) = c.center
             dist = math.sqrt((x - ((x_max + 8) / 2)) ** 2 + (y - ((y_max + 8) / 2)) ** 2)
-            if dist <= self.radius + 6:
+            if dist <= self.radius + 4:
                 c.tile = 0
             else:
                 c.tile = 99
@@ -125,24 +182,23 @@ class Map(object):
             final_joins = []
             # Loop through each outer edge of the map,
             # see which cells it abuts orthogonally from each region
-            for x in range(x1, x2):                  # Cells above & below
+            for x in range(x1, x2 + 1):                  # Cells above & below
                 potential_joins.append((self.map_abstract[(x, y1)],
-                                        self.map_abstract[(x, y1 + 1)]))
+                                        self.map_abstract[(x, y1 - 1)]))
                 potential_joins.append((self.map_abstract[(x, y2)],
-                                        self.map_abstract[(x, y2 - 1)]))
-            for y in range(y1, y2):                  # Cells left & right
+                                        self.map_abstract[(x, y2 + 1)]))
+            for y in range(y1, y2 + 1):                  # Cells left & right
                 potential_joins.append((self.map_abstract[(x1, y)],
                                         self.map_abstract[(x1 - 1, y)]))
                 potential_joins.append((self.map_abstract[(x2, y)],
                                         self.map_abstract[(x2 + 1, y)]))
-
 
             for region, cells in regions.iteritems():
                 neighbors[region] = []
                 for (r_cell, l_cell) in potential_joins:
                     if l_cell in cells:
                         neighbors[region].append((r_cell, l_cell))
-                n = random.randint(1, min(len(neighbors[region]), 3))
+                n = random.randint(1, min(1, min(len(neighbors[region]), 4)))
                 final_joins.extend(random.sample(neighbors[region], n))
 
             # Connect each cell with it's partner and set the door flag to true
@@ -175,7 +231,7 @@ class Map(object):
                 except KeyError:
                     continue
                 if next_cell in cells:
-                    next_cell.tile = 7
+                    next_cell.tile = 4
                     path.append(next_cell)
                     current.add_connection(next_cell)
                     cells.remove(next_cell)
@@ -241,8 +297,8 @@ class Room(object):
 
     def carve_room(self, map_abstract):
         cells = []
-        for x in range(self.x1, self.x2):
-            for y in range(self.y1, self.y2):
+        for x in range(self.x1, self.x2 + 1):
+            for y in range(self.y1, self.y2 + 1):
                 cells.append(map_abstract[(x, y)])
                 map_abstract[(x, y)].tile = 4
         for cell in cells:

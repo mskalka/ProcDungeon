@@ -40,48 +40,26 @@ class Screen(object):
 
         wall = self.spritesheet.image_at((0, 0, 16, 16))
         floor = self.spritesheet.image_at((16, 32, 16, 16))
+        door = self.spritesheet.image_at((48, 0, 0, 0))
 
-        x_max = 0
-        y_max = 0
+        x = len(self.map.final_map[0])
+        y = len(self.map.final_map)
 
-        for cell in self.map.map_abstract:
-            (x, y) = cell
-            x_max = max(x, x_max)
-            y_max = max(y, y_max)
+        map_surface = pygame.Surface(((x + 3) * 16,
+                                      (y + 3) * 16))
 
-        map_surface = pygame.Surface(((x_max + 3) * 16,
-                                      (y_max + 3) * 16))
-
-        for cell in self.map.map_abstract:
-            (x, y) = cell
-            ycord = (y * 16)
-            xcord = (x * 16)
-            if self.map.map_abstract[cell].tile == 4:
-                map_surface.blit(floor, (xcord, ycord))
-            elif self.map.map_abstract[cell].tile == 7:
-                map_surface.blit(wall, (xcord, ycord))
+        for i in range(y):
+            for j in range(x):
+                ycord = (i * 16)
+                xcord = (j * 16)
+                if self.map.final_map[i][j] == 4:
+                    map_surface.blit(floor, (xcord, ycord))
+                elif self.map.final_map[i][j] == 7:
+                    map_surface.blit(wall, (xcord, ycord))
+                elif self.map.final_map[i][j] == 3:
+                    map_surface.blit(door, (xcord, ycord))
 
         return map_surface
-
-    def draw_map_old(self):
-        walls = [self.spritesheet.image_at((0, 0, 16, 16)),
-                 self.spritesheet.image_at((0, 16, 16, 16)),
-                 self.spritesheet.image_at((0, 32, 16, 16))]
-        floors = [self.spritesheet.image_at((16, 0, 16, 16)),
-                  self.spritesheet.image_at((16, 16, 16, 16)),
-                  self.spritesheet.image_at((16, 32, 16, 16))]
-        door = self.spritesheet.image_at((32, 0, 16, 16))
-
-        for i in range(self.map.y):
-            for j in range(self.map.x):
-                ycord = (i * 16) - self.mapyoffset
-                xcord = (j * 16) - self.mapxoffset
-                if self.map.map_abstract[i][j] == 7:
-                    self.screen.blit(walls[1], (ycord, xcord))
-                elif self.map.map_abstract[i][j] == 4:
-                    self.screen.blit(floors[2], (ycord, xcord))
-                elif self.map.map_abstract[i][j] == 2:
-                    self.screen.blit(door, (ycord, xcord))
 
     def draw_wall_toppers(self):
         # Store the sprites for the wall tops.
@@ -102,12 +80,15 @@ class Screen(object):
                         self.spritesheet.image_at((112, 0, 16, 16)),
                         self.spritesheet.image_at((96, 48, 16, 24))]
 
-        for i in range(1, self.map.y):
-            for j in range(1, self.map.x):
+        x = len(self.map.final_map[0])
+        y = len(self.map.final_map)
+
+        for i in range(1, y):
+            for j in range(1, x):
                 ycord = (i * 16)
                 xcord = (j * 16) - 8
                 # Logic for walls here:
-                if self.map.map_abstract[i][j] == 7:
+                if self.map.final_map[i][j] == 7:
                     if (self.check_tile(i + 1, j, 7) and
                        self.check_tile(i - 1, j, 7) and
                        self.check_tile(i, j - 1, 7) and
@@ -193,7 +174,7 @@ class Screen(object):
 
     def check_tile(self, y, x, tile):
         try:
-            is_tile = self.map.map_abstract[y][x] == tile
+            is_tile = self.map.final_map[y][x] == tile
         except IndexError:
             return True
         else:
@@ -211,7 +192,7 @@ class Screen(object):
     def draw_screen_layers(self):
         self.screen.fill((0, 0, 0))
         self.screen.blit(self.map_surface, (self.mapxoffset, self.mapyoffset))
-        # self.draw_path()
+        # self.draw_wall_toppers()
         # self.draw_player()
         pygame.display.flip()
 
