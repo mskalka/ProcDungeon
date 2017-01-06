@@ -11,12 +11,12 @@ from pygame.locals import *
 
 class Game(object):
 
-    SCREEN_WIDTH = 800
-    SCREEN_HEIGHT = 600
+    SCREEN_WIDTH = 1000
+    SCREEN_HEIGHT = 800
 
     def __init__(self):
         self.clock = pygame.time.Clock()
-        self.map = Map(11, 24, 0)  # radius, rooms, fuzz
+        self.map = Map(10, 26, 0)  # radius, rooms, fuzz
         self.player = Player(self.map)
         self.screen = Screen(self.player,
                              self.map,

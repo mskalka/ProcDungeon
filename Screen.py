@@ -85,8 +85,8 @@ class Screen(object):
 
         for i in range(1, y):
             for j in range(1, x):
-                ycord = (i * 16)
-                xcord = (j * 16) - 8
+                ycord = (i * 16) - 8 + self.mapyoffset
+                xcord = (j * 16) + self.mapxoffset
                 # Logic for walls here:
                 if self.map.final_map[i][j] == 7:
                     if (self.check_tile(i + 1, j, 7) and
@@ -94,83 +94,83 @@ class Screen(object):
                        self.check_tile(i, j - 1, 7) and
                        self.check_tile(i, j + 1, 7)):
                             # It's a cross
-                            self.screen.blit(wall_toppers[0], (ycord, xcord))
+                            self.screen.blit(wall_toppers[0], (xcord, ycord))
 
                     if (self.check_tile(i + 1, j, 7) and  # Below
                        self.check_tile(i - 1, j, 7) and  # Above
                        self.check_tile(i, j - 1, 4) and  # Left
                        self.check_tile(i, j + 1, 4)):  # Right
-                            self.screen.blit(wall_toppers[2], (ycord, xcord))
+                            self.screen.blit(wall_toppers[1], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 4) and
                        self.check_tile(i - 1, j, 4) and
                        self.check_tile(i, j - 1, 7) and
                        self.check_tile(i, j + 1, 7)):
-                            self.screen.blit(wall_toppers[1], (ycord, xcord))
+                            self.screen.blit(wall_toppers[2], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 7) and
                        self.check_tile(i - 1, j, 7) and
                        self.check_tile(i, j - 1, 7) and
                        self.check_tile(i, j + 1, 4)):
-                            self.screen.blit(wall_toppers[5], (ycord, xcord))
+                            self.screen.blit(wall_toppers[3], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 7) and
                        self.check_tile(i - 1, j, 7) and
                        self.check_tile(i, j - 1, 4) and
                        self.check_tile(i, j + 1, 7)):
-                            self.screen.blit(wall_toppers[6], (ycord, xcord))
+                            self.screen.blit(wall_toppers[4], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 4) and
                        self.check_tile(i - 1, j, 7) and
                        self.check_tile(i, j - 1, 7) and
                        self.check_tile(i, j + 1, 7)):
-                            self.screen.blit(wall_toppers[3], (ycord, xcord))
+                            self.screen.blit(wall_toppers[5], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 7) and
                        self.check_tile(i - 1, j, 4) and
                        self.check_tile(i, j - 1, 7) and
                        self.check_tile(i, j + 1, 7)):
-                            self.screen.blit(wall_toppers[4], (ycord, xcord))
+                            self.screen.blit(wall_toppers[6], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 4) and
                        self.check_tile(i - 1, j, 7) and
                        self.check_tile(i, j - 1, 4) and
                        self.check_tile(i, j + 1, 7)):
-                            self.screen.blit(wall_toppers[9], (ycord, xcord))
+                            self.screen.blit(wall_toppers[8], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 7) and
                        self.check_tile(i - 1, j, 4) and
                        self.check_tile(i, j - 1, 4) and
                        self.check_tile(i, j + 1, 7)):
-                            self.screen.blit(wall_toppers[10], (ycord, xcord))
+                            self.screen.blit(wall_toppers[10], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 7) and
                        self.check_tile(i - 1, j, 4) and
                        self.check_tile(i, j - 1, 7) and
                        self.check_tile(i, j + 1, 4)):
-                            self.screen.blit(wall_toppers[8], (ycord, xcord))
+                            self.screen.blit(wall_toppers[9], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 4) and
                        self.check_tile(i - 1, j, 7) and
                        self.check_tile(i, j - 1, 7) and
                        self.check_tile(i, j + 1, 4)):
-                            self.screen.blit(wall_toppers[7], (ycord, xcord))
+                            self.screen.blit(wall_toppers[7], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 4) and
                        self.check_tile(i - 1, j, 4) and
                        self.check_tile(i, j - 1, 7) and
                        self.check_tile(i, j + 1, 4)):
-                            self.screen.blit(wall_toppers[11], (ycord, xcord))
+                            self.screen.blit(wall_toppers[14], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 4) and
                        self.check_tile(i - 1, j, 4) and
                        self.check_tile(i, j - 1, 4) and
                        self.check_tile(i, j + 1, 7)):
-                            self.screen.blit(wall_toppers[12], (ycord, xcord))
+                            self.screen.blit(wall_toppers[13], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 4) and
                        self.check_tile(i - 1, j, 7) and
                        self.check_tile(i, j - 1, 4) and
                        self.check_tile(i, j + 1, 4)):
-                            self.screen.blit(wall_toppers[14], (ycord, xcord))
+                            self.screen.blit(wall_toppers[11], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 7) and
                        self.check_tile(i - 1, j, 4) and
                        self.check_tile(i, j - 1, 4) and
                        self.check_tile(i, j + 1, 4)):
-                            self.screen.blit(wall_toppers[13], (ycord, xcord))
+                            self.screen.blit(wall_toppers[12], (xcord, ycord))
                     if (self.check_tile(i + 1, j, 4) and
                        self.check_tile(i - 1, j, 4) and
                        self.check_tile(i, j - 1, 4) and
                        self.check_tile(i, j + 1, 4)):
-                            self.screen.blit(wall_toppers[15], (ycord, xcord))
+                            self.screen.blit(wall_toppers[15], (xcord, ycord))
 
     def check_tile(self, y, x, tile):
         try:

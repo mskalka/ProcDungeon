@@ -1,7 +1,5 @@
 import random
 import math
-import networkx as nx
-
 
 class Map(object):
 
@@ -24,6 +22,7 @@ class Map(object):
         self.desired_rooms = desired_rooms
         self.room_fuzz = fuzz
         self.room_count = 0
+        self.region_id = 0
         self.generate_map()
 
     def generate_map(self):
@@ -72,24 +71,21 @@ class Map(object):
                     for y in range(min(y1, y2) * 2, max(y1, y2) * 2 + 1):
                         for x in range(min(x1, x2) * 2, max(x1, x2) * 2 + 1):
                             self.final_map[y][x] = cell.tile
-        for room in self.room_list:
-            (x1, y1) = (room.x1, room.y1)
-            (x2, y2) = (room.x2, room.y2)
-            self.final_map[y1 * 2][x1 * 2] = 3
-            self.final_map[y2 * 2][x2 * 2] = 3
+                            if cell.doors:
+                                p_doors.append(cell)
 
         for cell in p_doors:
             (x1, y1) = cell.center
             for other in cell.doors:
                 (x2, y2) = other.center
-                if x1 < x2 and y1 == y2:  # Other to right
-                    self.final_map[y1 * 2][(x2 * 2) - 1] = 3
-                if x1 == x2 and y1 < y2:  # Above the other
-                    self.final_map[(y1 * 2) - 1][x1 * 2] = 3
-                if x2 < x1 and y1 == y2:  # Other to left
-                    self.final_map[y1 * 2][(x1 * 2) - 1] = 3
-                if x1 == x2 and y1 > y2:  # Below the other
-                    self.final_map[(y1 * 2) + 1][x1 * 2] = 3
+                for y in range((min(y1, y2) * 2) + 1, max(y1, y2) * 2 + 1):
+                    for x in range((min(x1, x2) * 2) + 1, max(x1, x2) * 2 + 1):
+                        self.final_map[y][x] = 3
+        """for room in self.room_list:
+            self.final_map[room.y1 * 2 - 1][room.x1 * 2] = 3
+            self.final_map[room.y2 * 2 + 1][room.x1 * 2] = 3
+            self.final_map[room.y1 * 2 - 1][room.x2 * 2] = 3
+            self.final_map[room.y2 * 2 + 1][room.x2 * 2] = 3"""
 
     def place_rooms(self):
         while self.room_count < self.desired_rooms:
@@ -150,7 +146,6 @@ class Map(object):
         # Add each cell into a list of unvisited cells, remove when visited
         cells = []
         regions = {}
-        region_id = 0
         for _, cell in self.map_abstract.iteritems():
             # Add only cells where there isn't a floor already
             if cell.tile == 0:
@@ -164,8 +159,10 @@ class Map(object):
         """
 
         while len(cells) > 0:
-            regions[region_id] = self.generate_maze(region_id, cells)
+            regions[self.region_id] = self.generate_maze(cells)
 
+        for (key, val) in regions.iteritems():
+            print key
         """
         After maze generation , ensure that the room is connected to each
         region it abuts. First find candidate doors, then pick 1-3 at random,
@@ -180,8 +177,9 @@ class Map(object):
             neighbors = {}
             potential_joins = []
             final_joins = []
-            # Loop through each outer edge of the map,
-            # see which cells it abuts orthogonally from each region
+            # Loop through each outer edge of the room,
+            # see which cells it abuts orthogonally
+
             for x in range(x1, x2 + 1):                  # Cells above & below
                 potential_joins.append((self.map_abstract[(x, y1)],
                                         self.map_abstract[(x, y1 - 1)]))
@@ -198,14 +196,17 @@ class Map(object):
                 for (r_cell, l_cell) in potential_joins:
                     if l_cell in cells:
                         neighbors[region].append((r_cell, l_cell))
-                n = random.randint(1, min(1, min(len(neighbors[region]), 4)))
-                final_joins.extend(random.sample(neighbors[region], n))
-
+                print neighbors[region]
+                try:
+                    final_joins.append(random.choice(neighbors[region]))
+                    final_joins.append(random.choice(neighbors[region]))
+                except IndexError:
+                    pass
             # Connect each cell with it's partner and set the door flag to true
             for (r_cell, l_cell) in final_joins:
                 r_cell.add_connection(l_cell, door=True)
 
-    def generate_maze(self, region_id, cells):
+    def generate_maze(self, cells):
         """
         Use a recursive backtracking alg to fill the space between the rooms with
         a maze.
@@ -243,7 +244,7 @@ class Map(object):
                 popped = path.pop()
                 continue
 
-        region_id += 1
+        self.region_id += 1
         return region
 
     def get_random_point(self, radius):
