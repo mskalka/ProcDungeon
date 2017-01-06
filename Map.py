@@ -23,12 +23,12 @@ class Map(object):
         self.room_fuzz = fuzz
         self.room_count = 0
         self.region_id = 0
-        self.generate_map()
+        self.generate_cells()
+        self.create_final_map()
 
-    def generate_map(self):
+    def generate_cells(self):
         self.place_rooms()
         self.add_halls()
-        self.create_final_map()
 
     def create_final_map(self):
         """
@@ -57,9 +57,9 @@ class Map(object):
             x_max = max(x, x_max)
             y_max = max(y, y_max)
 
-        for y in range(0, (y_max * 2) + 2):
+        for y in range(0, (y_max * 2)):
             self.final_map.append([])
-            for x in range(0, (x_max * 2) + 2):
+            for x in range(0, (x_max * 2)):
                 self.final_map[y].append(7)
 
         for _, cell in self.map_abstract.iteritems():
@@ -196,12 +196,13 @@ class Map(object):
                 for (r_cell, l_cell) in potential_joins:
                     if l_cell in cells:
                         neighbors[region].append((r_cell, l_cell))
-                print neighbors[region]
-                try:
+                if len(neighbors[region]) > 0:
                     final_joins.append(random.choice(neighbors[region]))
-                    final_joins.append(random.choice(neighbors[region]))
-                except IndexError:
-                    pass
+                    if random.randint(0, 3) > 0:
+                        final_joins.append(random.choice(neighbors[region]))
+                        if random.randint(0, 1) > 0:
+                            final_joins.append(random.choice(neighbors[region]))
+
             # Connect each cell with it's partner and set the door flag to true
             for (r_cell, l_cell) in final_joins:
                 r_cell.add_connection(l_cell, door=True)

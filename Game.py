@@ -16,7 +16,7 @@ class Game(object):
 
     def __init__(self):
         self.clock = pygame.time.Clock()
-        self.map = Map(10, 26, 0)  # radius, rooms, fuzz
+        self.map = Map(10, 22, 0)  # radius, rooms, fuzz
         self.player = Player(self.map)
         self.screen = Screen(self.player,
                              self.map,

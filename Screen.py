@@ -45,8 +45,8 @@ class Screen(object):
         x = len(self.map.final_map[0])
         y = len(self.map.final_map)
 
-        map_surface = pygame.Surface(((x + 3) * 16,
-                                      (y + 3) * 16))
+        map_surface = pygame.Surface((x * 16,
+                                      y * 16))
 
         for i in range(y):
             for j in range(x):
