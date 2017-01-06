@@ -52,35 +52,13 @@ class Screen(object):
         map_surface = pygame.Surface(((x_max + 3) * 16,
                                       (y_max + 3) * 16))
 
-        """for x in range(-100, 100):
-            for y in range(-100, 100):
-                ycord = (y * 16)
-                xcord = (x * 16)
-                map_surface.blit(wall, (xcord, ycord))
-
-        for room in self.map.room_list:
-            for x in range(room.x1, room.x2):
-                for y in range(room.y1, room.y2):
-                    ycord = (y * 16) + 16
-                    xcord = (x * 16) + 16
-                    map_surface.blit(floor, (xcord, ycord))
-
-        for hall in self.map.hall_list:
-            for x in range(hall.x1, hall.x2 + 1):
-                for y in range(hall.y1, hall.y2 + 1):
-                    ycord = (y * 16)
-                    xcord = (x * 16)
-                    map_surface.blit(floor, (xcord, ycord))
-        map_surface.blit(floor, ((x_max + 1) * 16,
-                                 (y_max + 1) * 16))"""
-
         for cell in self.map.map_abstract:
             (x, y) = cell
             ycord = (y * 16)
             xcord = (x * 16)
             if self.map.map_abstract[cell].tile == 4:
                 map_surface.blit(floor, (xcord, ycord))
-            elif self.map.map_abstract[cell].tile == 0:
+            elif self.map.map_abstract[cell].tile == 7:
                 map_surface.blit(wall, (xcord, ycord))
 
         return map_surface
