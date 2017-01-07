@@ -11,8 +11,8 @@ from pygame.locals import *
 
 class Game(object):
 
-    SCREEN_WIDTH = 1000
-    SCREEN_HEIGHT = 800
+    SCREEN_WIDTH = 1200
+    SCREEN_HEIGHT = 1200
 
     def __init__(self):
         self.clock = pygame.time.Clock()
