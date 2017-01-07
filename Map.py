@@ -66,26 +66,27 @@ class Map(object):
             if cell.tile != 99:
                 (x1, y1) = cell.center
                 self.final_map[y1 * 2][x1 * 2] = cell.tile
+                if cell.doors:
+                    p_doors.append(cell)
                 for other in cell.connections:
                     (x2, y2) = other.center
                     for y in range(min(y1, y2) * 2, max(y1, y2) * 2 + 1):
                         for x in range(min(x1, x2) * 2, max(x1, x2) * 2 + 1):
                             self.final_map[y][x] = cell.tile
-                            if cell.doors:
-                                p_doors.append(cell)
-
+        # Add in the doors
         for cell in p_doors:
             (x1, y1) = cell.center
             for other in cell.doors:
                 (x2, y2) = other.center
-                for y in range((min(y1, y2) * 2) + 1, max(y1, y2) * 2 + 1):
-                    for x in range((min(x1, x2) * 2) + 1, max(x1, x2) * 2 + 1):
-                        self.final_map[y][x] = 3
-        """for room in self.room_list:
-            self.final_map[room.y1 * 2 - 1][room.x1 * 2] = 3
-            self.final_map[room.y2 * 2 + 1][room.x1 * 2] = 3
-            self.final_map[room.y1 * 2 - 1][room.x2 * 2] = 3
-            self.final_map[room.y2 * 2 + 1][room.x2 * 2] = 3"""
+                # If the cells are aligned vertically or horizontally then
+                # add a door between them in the other axis.
+                if x1 == x2:
+                    for y in range(min(y1 * 2, y2 * 2) + 1, max(y1 * 2, y2 * 2)):
+                        self.final_map[y][x1 * 2] = 3
+                if y1 == y2:
+                    for x in range(min(x1 * 2, x2 * 2) + 1, max(x1 * 2, x2 * 2)):
+                        self.final_map[y1 * 2][x] = 3
+
 
     def place_rooms(self):
         while self.room_count < self.desired_rooms:
@@ -161,8 +162,6 @@ class Map(object):
         while len(cells) > 0:
             regions[self.region_id] = self.generate_maze(cells)
 
-        for (key, val) in regions.iteritems():
-            print key
         """
         After maze generation , ensure that the room is connected to each
         region it abuts. First find candidate doors, then pick 1-3 at random,
