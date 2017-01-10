@@ -11,12 +11,12 @@ from pygame.locals import *
 
 class Game(object):
 
-    SCREEN_WIDTH = 1200
-    SCREEN_HEIGHT = 1200
+    SCREEN_WIDTH = 1000
+    SCREEN_HEIGHT = 800
 
     def __init__(self):
         self.clock = pygame.time.Clock()
-        self.map = Map(10, 22, 0)  # radius, rooms, fuzz
+        self.map = Map(10, 20, 0)  # radius, rooms, fuzz
         self.player = Player(self.map)
         self.screen = Screen(self.player,
                              self.map,
@@ -28,14 +28,8 @@ class Game(object):
         self.run()
 
     def run(self):
-        """
-        # Test the Pathfinding:
-        c = Creature(self.map.map_abstract)
-        r = random.choice(self.map.room_list)
-        print("Start:({}, {})".format(r.center[0], r.center[1]))
-        print("Goal:({}, {})".format(Player.xpos, Player.ypos))
-        p = c.path_to((r.center[0], r.center[1]), (Player.xpos, Player.ypos))
-        """
+        for room in self.map.room_list:
+            print room.center
         while 1:
             self.clock.tick(30)
             for event in pygame.event.get():
@@ -44,16 +38,16 @@ class Game(object):
                     sys.exit(0)
                 if self.pressed[K_UP]:
                     self.screen.mapyoffset += 16
-                    # Player.move(self.player, -1, 0)
+                    self.player.move((-1, 0))
                 if self.pressed[K_DOWN]:
                     self.screen.mapyoffset -= 16
-                    # Player.move(self.player, 1, 0)
+                    self.player.move((1, 0))
                 if self.pressed[K_LEFT]:
                     self.screen.mapxoffset += 16
-                    # Player.move(self.player, 0, -1)
+                    self.player.move((0, -1))
                 if self.pressed[K_RIGHT]:
                     self.screen.mapxoffset -= 16
-                    # Player.move(self.player, 0, 1)
+                    self.player.move((0, 1))
                 else:
                     continue
             self.screen.draw_screen_layers()

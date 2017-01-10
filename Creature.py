@@ -1,27 +1,25 @@
-from Map import Map
 import networkx as nx
 
 
 class Creature(object):
 
-    def __init__(self, current_map):
-        self.current_map = current_map
-        self.pathfinding = Pathfinding(current_map)
+    def __init__(self):
+        self.pathfinding = Pathfinding(current_map.final_map)
+        self.xpos = 0
+        self.ypos = 0
 
-    def get_pos(self):
-        return self.xpos, self.ypos
-
-    def set_pos(self, x, y):
+    def set_pos(self, (x, y)):
         self.xpos = x
         self.ypos = y
 
-    def move(self, x, y):
-        if self.check_intersect(self.xpos, self.ypos, x, y):
-            self.xpos += x
-            self.ypos += y
+    def move(self, (x, y)):
+        # if self.check_intersect(self.xpos, self.ypos, x, y):
+        self.xpos += x
+        self.ypos += y
+        print self.xpos, self.ypos
 
     def check_intersect(self, xpos, ypos, xdelta, ydelta):
-        return not Map.map_abstract[ypos + ydelta][xpos + xdelta] == 7
+        return not self.current_map.final_map[ypos + ydelta][xpos + xdelta] == 7
 
     def path_to(self, start, goal):
         return self.pathfinding.find_path(start, goal)
@@ -35,15 +33,16 @@ class Pathfinding:
 
     def make_graph(self, current_map):
         g = nx.Graph()
-        for i in range(0, len(current_map)):
-            for j in range(0, len(current_map[0])):
-                if current_map[i][j] != 7:
-                    cell = (j, i)
+        for y in range(0, len(current_map)):
+            for x in range(0, len(current_map[0])):
+                if (current_map[y][x] == 4 or current_map[y][x] == 3):
+                    cell = (x, y)
                     neighbors = []
                     # If it's not a wall, add it to the list of neighbors
                     try:
-                        neighbors = [(j + x, i + y) for (x, y) in self.adjacents if
-                                     current_map[i + y][j + x] == 4]
+                        neighbors = [(x + j, y + j) for (i, j) in self.adjacents if
+                                     (current_map[y + j][x + i] == 4 or
+                                      current_map[y + j][x + i] == 3)]
                     except IndexError:
                         continue
                     for room in neighbors:
@@ -54,7 +53,7 @@ class Pathfinding:
         try:
             return nx.astar_path(self.graph, start, goal, self.dist)
         except Exception:
-            print "I failed to find a path!"
+            return None
 
     def dist(self, a, b):
         (x1, y1) = a

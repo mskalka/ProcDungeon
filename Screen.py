@@ -9,13 +9,15 @@ class Screen(object):
     mapxoffset = 0
 
     def __init__(self, player, current_map, width, height):
-        self.screen = pygame.display.set_mode((width, height))
+        self.width = width
+        self.height = height
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF | pygame.RESIZABLE)
         self.screen.fill((0, 0, 0))
         self.entities = pygame.sprite.LayeredUpdates()
         self.map = current_map
         self.spritesheet = Spritesheet('spritesheet.png')
         self.player = player
-        self.map_surface = self.draw_map(width, height)
+        self.map_surface = self.draw_map(self.width, self.height)
 
     def draw_player(self):
         xcord = (self.player.xpos * 16)
@@ -197,7 +199,7 @@ class Screen(object):
         self.screen.fill((0, 0, 0))
         self.screen.blit(self.map_surface, (self.mapxoffset, self.mapyoffset))
         # self.draw_wall_toppers()
-        # self.draw_player()
+        self.draw_player()
         pygame.display.flip()
 
 

@@ -14,20 +14,21 @@ class Map(object):
 
     def __init__(self, radius, desired_rooms, fuzz):
         self.room_list = []
-        self.hall_list = []
         self.map_abstract = {}
         self.revealed_map = []
         self.final_map = []
         self.radius = radius
+        self.center = (self.radius + 5, self.radius + 5)
         self.desired_rooms = desired_rooms
         self.room_fuzz = fuzz
         self.room_count = 0
         self.region_id = 0
-        self.generate_cells()
+        self.generate_rooms_and_halls()
         self.create_final_map()
 
-    def generate_cells(self):
+    def generate_rooms_and_halls(self):
         self.place_rooms()
+        self.generate_cells()
         self.add_halls()
 
     def create_final_map(self):
@@ -57,9 +58,9 @@ class Map(object):
             x_max = max(x, x_max)
             y_max = max(y, y_max)
 
-        for y in range(0, (y_max * 2)):
+        for y in range((y_max + 1) * 2):
             self.final_map.append([])
-            for x in range(0, (x_max * 2)):
+            for x in range((x_max + 1) * 2):
                 self.final_map[y].append(7)
 
         for _, cell in self.map_abstract.iteritems():
@@ -87,8 +88,8 @@ class Map(object):
                     for x in range(min(x1 * 2, x2 * 2) + 1, max(x1 * 2, x2 * 2)):
                         self.final_map[y1 * 2][x] = 3
 
-
     def place_rooms(self):
+
         while self.room_count < self.desired_rooms:
             # Each room gets its own unique region ID, to be used in hall placement
 
@@ -119,21 +120,24 @@ class Map(object):
                 self.room_list.append(new_room)
                 self.room_count += 1
 
+    def generate_cells(self):
         x_max = 0
         y_max = 0
-        # Offset the rooms by the radius to move the center from (0, 0) to
-        # (r, r) which puts the bottom left room close enough to (0, 0)
+        cells = []
+
         for room in self.room_list:
-            room.move_room((self.radius + 9, self.radius + 9))
             x_max = max(max(room.x1, room.x2), x_max)
             y_max = max(max(room.y1, room.y2), y_max)
 
-        cells = [Cell((x, y)) for x in range(x_max + 15) for y in range(y_max + 15)]
+        for y in range((self.radius + 6) * 2):
+            for x in range((self.radius + 6) * 2):
+                cells.append(Cell((x, y)))
+
         r = max(x_max, y_max)
 
         for c in cells:
             (x, y) = c.center
-            dist = math.sqrt((x - ((x_max + 8) / 2)) ** 2 + (y - ((y_max + 8) / 2)) ** 2)
+            dist = math.sqrt((x - self.center[0]) ** 2 + ((y - self.center[1])) ** 2)
             if dist <= self.radius + 4:
                 c.tile = 0
             else:
@@ -258,8 +262,9 @@ class Map(object):
 
         point = (self.roundm(radius * r * math.cos(t), 1),
                  self.roundm(radius * r * math.sin(t), 1))
+        point = map(sum, zip(point, self.center))
 
-        return point
+        return (point[0], point[1])
 
     def roundm(self, n, m):
         return int(n // m)
