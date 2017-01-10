@@ -1,31 +1,29 @@
 import pygame
 import random
 from Map import Map
-from Player import Player
+from DungeonMaster import DungeonMaster
 
 
 class Screen(object):
     mapyoffset = 0
     mapxoffset = 0
 
-    def __init__(self, player, current_map, width, height):
+    def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF | pygame.RESIZABLE)
+        self.screen = pygame.display.set_mode((self.width, self.height),
+                                              pygame.DOUBLEBUF | pygame.RESIZABLE)
         self.screen.fill((0, 0, 0))
-        self.entities = pygame.sprite.LayeredUpdates()
-        self.map = current_map
         self.spritesheet = Spritesheet('spritesheet.png')
-        self.player = player
         self.map_surface = self.draw_map(self.width, self.height)
 
-    def draw_player(self):
-        xcord = (self.player.xpos * 16)
-        ycord = (self.player.ypos * 16)
+    def draw_player(self, player):
+        xcord = (self.player.xpos * 16) + mapxoffset
+        ycord = (self.player.ypos * 16) + mapyoffset
         player = self.spritesheet.image_at((192, 0, 16, 16))
-        self.screen.blit(player, (ycord, xcord))
+        self.screen.blit(player, (xcord, ycord))
 
-    def draw_map(self, width, height):
+    def draw_map(self, current_map):
         """
         In order to cut down on the current number of blits and loops while the
         screen updates, we only call the draw map function once. This outputs the
@@ -34,10 +32,6 @@ class Screen(object):
         the player can stand still. This will be further refined with the addition
         of a sane camera system that is softly bounded by the screen itself.
         AKA more to come.
-
-        In addition to the map itself, the wall topper has to be drawn at a 8px
-        offset above the walls to give a sense of depth. For now this is going to
-        be a solid color until a more exact solution can be found.
         """
 
         wall = self.spritesheet.image_at((0, 0, 16, 16))
@@ -50,20 +44,20 @@ class Screen(object):
         map_surface = pygame.Surface((x * 16,
                                       y * 16))
 
-        for i in range(y):
-            for j in range(x):
-                ycord = (i * 16)
+        for j in range(x):
+            for i in range(y):
                 xcord = (j * 16)
-                if self.map.final_map[i][j] == 4:
+                ycord = (i * 16)
+                if current_map.final_map[i][j] == 4:
                     map_surface.blit(floor, (xcord, ycord))
-                elif self.map.final_map[i][j] == 7:
+                elif current_map.final_map[i][j] == 7:
                     map_surface.blit(wall, (xcord, ycord))
-                elif self.map.final_map[i][j] == 3:
+                elif current_map.final_map[i][j] == 3:
                     map_surface.blit(door, (xcord, ycord))
 
         return map_surface
 
-    def draw_wall_toppers(self):
+    def draw_wall_toppers(self, current_map):
         # Store the sprites for the wall tops.
         wall_toppers = [self.spritesheet.image_at((112, 16, 16, 16)),
                         self.spritesheet.image_at((80, 32, 16, 16)),
@@ -82,105 +76,105 @@ class Screen(object):
                         self.spritesheet.image_at((112, 0, 16, 16)),
                         self.spritesheet.image_at((96, 48, 16, 24))]
 
-        x = len(self.map.final_map[0])
-        y = len(self.map.final_map)
+        x = len(current_map.final_map[0])
+        y = len(current_map.final_map)
 
         for i in range(1, y):
             for j in range(1, x):
-                ycord = (i * 16) - 8 + self.mapyoffset
-                xcord = (j * 16) + self.mapxoffset
+                ycord = (i * 16) - 8 + mapyoffset
+                xcord = (j * 16) + mapxoffset
                 # Logic for walls here:
-                if self.map.final_map[i][j] == 7:
-                    if (self.check_tile(i + 1, j, 7, 3) and
-                       self.check_tile(i - 1, j, 7, 3) and
-                       self.check_tile(i, j - 1, 7, 3) and
-                       self.check_tile(i, j + 1, 7, 3)):
+                if current_map.final_map[i][j] == 7:
+                    if (self.check_tile(current_map, i + 1, j, 7, 3) and
+                       self.check_tile(current_map, i - 1, j, 7, 3) and
+                       self.check_tile(current_map, i, j - 1, 7, 3) and
+                       self.check_tile(current_map, i, j + 1, 7, 3)):
                             # It's a cross
                             self.screen.blit(wall_toppers[0], (xcord, ycord))
 
-                    if (self.check_tile(i + 1, j, 7, 3) and  # Below
-                       self.check_tile(i - 1, j, 7, 3) and  # Above
-                       self.check_tile(i, j - 1, 4) and  # Left
-                       self.check_tile(i, j + 1, 4)):  # Right
+                    if (self.check_tile(current_map, i + 1, j, 7, 3) and  # Below
+                       self.check_tile(current_map, i - 1, j, 7, 3) and  # Above
+                       self.check_tile(current_map, i, j - 1, 4) and  # Left
+                       self.check_tile(current_map, i, j + 1, 4)):  # Right
                             self.screen.blit(wall_toppers[1], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 4) and
-                       self.check_tile(i - 1, j, 4) and
-                       self.check_tile(i, j - 1, 7, 3) and
-                       self.check_tile(i, j + 1, 7, 3)):
+                    if (self.check_tile(current_map, i + 1, j, 4) and
+                       self.check_tile(current_map, i - 1, j, 4) and
+                       self.check_tile(current_map, i, j - 1, 7, 3) and
+                       self.check_tile(current_map, i, j + 1, 7, 3)):
                             self.screen.blit(wall_toppers[2], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 7, 3) and
-                       self.check_tile(i - 1, j, 7, 3) and
-                       self.check_tile(i, j - 1, 7, 3) and
-                       self.check_tile(i, j + 1, 4)):
+                    if (self.check_tile(current_map, i + 1, j, 7, 3) and
+                       self.check_tile(current_map, i - 1, j, 7, 3) and
+                       self.check_tile(current_map, i, j - 1, 7, 3) and
+                       self.check_tile(current_map, i, j + 1, 4)):
                             self.screen.blit(wall_toppers[3], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 7, 3) and
-                       self.check_tile(i - 1, j, 7, 3) and
-                       self.check_tile(i, j - 1, 4) and
-                       self.check_tile(i, j + 1, 7, 3)):
+                    if (self.check_tile(current_map, i + 1, j, 7, 3) and
+                       self.check_tile(current_map, i - 1, j, 7, 3) and
+                       self.check_tile(current_map, i, j - 1, 4) and
+                       self.check_tile(current_map, i, j + 1, 7, 3)):
                             self.screen.blit(wall_toppers[4], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 4) and
-                       self.check_tile(i - 1, j, 7, 3) and
-                       self.check_tile(i, j - 1, 7, 3) and
-                       self.check_tile(i, j + 1, 7, 3)):
+                    if (self.check_tile(current_map, i + 1, j, 4) and
+                       self.check_tile(current_map, i - 1, j, 7, 3) and
+                       self.check_tile(current_map, i, j - 1, 7, 3) and
+                       self.check_tile(current_map, i, j + 1, 7, 3)):
                             self.screen.blit(wall_toppers[5], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 7, 3) and
-                       self.check_tile(i - 1, j, 4) and
-                       self.check_tile(i, j - 1, 7, 3) and
-                       self.check_tile(i, j + 1, 7, 3)):
+                    if (self.check_tile(current_map, i + 1, j, 7, 3) and
+                       self.check_tile(current_map, i - 1, j, 4) and
+                       self.check_tile(current_map, i, j - 1, 7, 3) and
+                       self.check_tile(current_map, i, j + 1, 7, 3)):
                             self.screen.blit(wall_toppers[6], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 4) and
-                       self.check_tile(i - 1, j, 7, 3) and
-                       self.check_tile(i, j - 1, 4) and
-                       self.check_tile(i, j + 1, 7, 3)):
+                    if (self.check_tile(current_map, i + 1, j, 4) and
+                       self.check_tile(current_map, i - 1, j, 7, 3) and
+                       self.check_tile(current_map, i, j - 1, 4) and
+                       self.check_tile(current_map, i, j + 1, 7, 3)):
                             self.screen.blit(wall_toppers[8], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 7, 3) and
-                       self.check_tile(i - 1, j, 4) and
-                       self.check_tile(i, j - 1, 4) and
-                       self.check_tile(i, j + 1, 7, 3)):
+                    if (self.check_tile(current_map, i + 1, j, 7, 3) and
+                       self.check_tile(current_map, i - 1, j, 4) and
+                       self.check_tile(current_map, i, j - 1, 4) and
+                       self.check_tile(current_map, i, j + 1, 7, 3)):
                             self.screen.blit(wall_toppers[10], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 7, 3) and
-                       self.check_tile(i - 1, j, 4) and
-                       self.check_tile(i, j - 1, 7, 3) and
-                       self.check_tile(i, j + 1, 4)):
+                    if (self.check_tile(current_map, i + 1, j, 7, 3) and
+                       self.check_tile(current_map, i - 1, j, 4) and
+                       self.check_tile(current_map, i, j - 1, 7, 3) and
+                       self.check_tile(current_map, i, j + 1, 4)):
                             self.screen.blit(wall_toppers[9], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 4) and
-                       self.check_tile(i - 1, j, 7, 3) and
-                       self.check_tile(i, j - 1, 7, 3) and
-                       self.check_tile(i, j + 1, 4)):
+                    if (self.check_tile(current_map, i + 1, j, 4) and
+                       self.check_tile(current_map, i - 1, j, 7, 3) and
+                       self.check_tile(current_map, i, j - 1, 7, 3) and
+                       self.check_tile(current_map, i, j + 1, 4)):
                             self.screen.blit(wall_toppers[7], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 4) and
-                       self.check_tile(i - 1, j, 4) and
-                       self.check_tile(i, j - 1, 7, 3) and
-                       self.check_tile(i, j + 1, 4)):
+                    if (self.check_tile(current_map, i + 1, j, 4) and
+                       self.check_tile(current_map, i - 1, j, 4) and
+                       self.check_tile(current_map, i, j - 1, 7, 3) and
+                       self.check_tile(current_map, i, j + 1, 4)):
                             self.screen.blit(wall_toppers[14], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 4) and
-                       self.check_tile(i - 1, j, 4) and
-                       self.check_tile(i, j - 1, 4) and
-                       self.check_tile(i, j + 1, 7, 3)):
+                    if (self.check_tile(current_map, i + 1, j, 4) and
+                       self.check_tile(current_map, i - 1, j, 4) and
+                       self.check_tile(current_map, i, j - 1, 4) and
+                       self.check_tile(current_map, i, j + 1, 7, 3)):
                             self.screen.blit(wall_toppers[13], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 4) and
-                       self.check_tile(i - 1, j, 7, 3) and
-                       self.check_tile(i, j - 1, 4) and
-                       self.check_tile(i, j + 1, 4)):
+                    if (self.check_tile(current_map, i + 1, j, 4) and
+                       self.check_tile(current_map, i - 1, j, 7, 3) and
+                       self.check_tile(current_map, i, j - 1, 4) and
+                       self.check_tile(current_map, i, j + 1, 4)):
                             self.screen.blit(wall_toppers[11], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 7, 3) and
-                       self.check_tile(i - 1, j, 4) and
-                       self.check_tile(i, j - 1, 4) and
-                       self.check_tile(i, j + 1, 4)):
+                    if (self.check_tile(current_map, i + 1, j, 7, 3) and
+                       self.check_tile(current_map, i - 1, j, 4) and
+                       self.check_tile(current_map, i, j - 1, 4) and
+                       self.check_tile(current_map, i, j + 1, 4)):
                             self.screen.blit(wall_toppers[12], (xcord, ycord))
-                    if (self.check_tile(i + 1, j, 4) and
-                       self.check_tile(i - 1, j, 4) and
-                       self.check_tile(i, j - 1, 4) and
-                       self.check_tile(i, j + 1, 4)):
+                    if (self.check_tile(current_map, i + 1, j, 4) and
+                       self.check_tile(current_map, i - 1, j, 4) and
+                       self.check_tile(current_map, i, j - 1, 4) and
+                       self.check_tile(current_map, i, j + 1, 4)):
                             self.screen.blit(wall_toppers[15], (xcord, ycord))
 
-    def check_tile(self, y, x, tile1, tile2=None):
+    def check_tile(self, current_map, y, x, tile1, tile2=None):
         try:
             if tile2:
-                is_tile = (self.map.final_map[y][x] == tile1 or
-                           self.map.final_map[y][x] == tile2)
+                is_tile = (current_map.final_map[y][x] == tile1 or
+                           current_map.final_map[y][x] == tile2)
             else:
-                is_tile = self.map.final_map[y][x] == tile1
+                is_tile = current_map.final_map[y][x] == tile1
         except IndexError:
             return True
         else:
@@ -195,11 +189,11 @@ class Screen(object):
                     xcord = (j * 16) - self.mapyoffset
                     self.screen.blit(black, (ycord, xcord))
 
-    def draw_screen_layers(self):
+    def update(self, current_floor, player, creatures):
         self.screen.fill((0, 0, 0))
+        self.draw_map(current_floor)
         self.screen.blit(self.map_surface, (self.mapxoffset, self.mapyoffset))
-        # self.draw_wall_toppers()
-        self.draw_player()
+        self.draw_player(player)
         pygame.display.flip()
 
 

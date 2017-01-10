@@ -15,41 +15,27 @@ class Game(object):
     SCREEN_HEIGHT = 800
 
     def __init__(self):
+        """
+        Start clock
+        Create Screen
+            Blank until fed map
+            Create Camera
+                Points to nothing until screen updates
+        Create DM
+            DM creates maps, player, creatures
+            Then feeds map
+        """
         self.clock = pygame.time.Clock()
-        self.map = Map(10, 20, 0)  # radius, rooms, fuzz
-        self.player = Player(self.map)
-        self.screen = Screen(self.player,
-                             self.map,
-                             self.SCREEN_WIDTH,
-                             self.SCREEN_HEIGHT)
-        self.dm = DungeonMaster(self.map)
+        self.screen = Screen(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+        self.dm = DungeonMaster(self.screen)
         pygame.key.set_repeat(60, 60)
-
         self.run()
 
     def run(self):
-        for room in self.map.room_list:
-            print room.center
         while 1:
             self.clock.tick(30)
-            for event in pygame.event.get():
-                self.pressed = pygame.key.get_pressed()
-                if self.pressed[K_ESCAPE] or event.type == pygame.QUIT:
-                    sys.exit(0)
-                if self.pressed[K_UP]:
-                    self.screen.mapyoffset += 16
-                    self.player.move((-1, 0))
-                if self.pressed[K_DOWN]:
-                    self.screen.mapyoffset -= 16
-                    self.player.move((1, 0))
-                if self.pressed[K_LEFT]:
-                    self.screen.mapxoffset += 16
-                    self.player.move((0, -1))
-                if self.pressed[K_RIGHT]:
-                    self.screen.mapxoffset -= 16
-                    self.player.move((0, 1))
-                else:
-                    continue
+            
+            self.dm.update()
             self.screen.draw_screen_layers()
 
 
