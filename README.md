@@ -11,7 +11,10 @@ Current focus is on map generation combining a number of common and not so commo
 5. Ensure each room is connected to every maze it touches
 
 TODO:
-* Translating the cells to a displayable map
-* Reimpliment the player and other creatures. 
-* Pathfinding AI (partially implimented)
 * More robust camera
+* Reimpliment the player and other creatures.
+* Pathfinding AI (partially implimented)
+* Impliment DM system to coordinate creature movement, combat, loot, etc.
+
+# Example Map:
+![Alt text](/map_example.png?raw=true "Example Map")
